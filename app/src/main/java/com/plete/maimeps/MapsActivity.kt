@@ -40,7 +40,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        
+        //menyimpan LatLng ke dalam mutableMapOf
         var locationList = mutableMapOf<String, Double>("latLoc1" to 0.0, "lngLoc1" to 0.0, "latLoc2" to 0.0, "lngLoc2" to 0.0)
+        
+        //menyimpan alamat ke dalam muableMapOf
         var addressList = mutableMapOf<String, String>("address1" to "", "address2" to "")
 
         // Add a marker in JKT and move the camera
@@ -48,16 +52,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(jkt, 16f))
 
+        //fungsi yg membuat marker dapat berpindah pindah ketika bergeser
         mMap.setOnCameraIdleListener {
             currentLocation = mMap.cameraPosition.target
             val geocoder = Geocoder(this)
-            mMap.clear()
+            mMap.clear() //menghapus jejak marker ketika bergeser
             var geoCoderResult = geocoder.getFromLocation(currentLocation.latitude, currentLocation.longitude, 1)
-            currentAddress = geoCoderResult[0].getAddressLine(0)
+            currentAddress = geoCoderResult[0].getAddressLine(0) //mendapatkan value alamat sesuai marker
             mMap.addMarker(MarkerOptions().position(currentLocation).title("Position"))
         }
 
         btnSet.setOnClickListener {
+            /**
+             * parsing nilai tiap tiap parameter ke mutableMapOf
+             */
             if (locationList.get("latLoc1") == 0.0){
                 locationList.put("latLoc1", currentLocation.latitude)
                 locationList.put("lngLoc1", currentLocation.longitude)
@@ -70,21 +78,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 addressList.put("address2", currentAddress)
             }
 
+            /**
+             * menampilkan/mengambil nilai dalam mutableMapOf
+             * untuk ditampilkan di TextView
+             */
             tvLatLng1.text = "${addressList.get("address1")}"
             tvLatLng2.text = "${addressList.get("address2")}"
         }
 
         btnHitungJarak.setOnClickListener {
-            val loc1 = LatLng(locationList.get("latLoc1")!!, locationList.get("lngLoc1")!!)
+            val loc1 = LatLng(locationList.get("latLoc1")!!, locationList.get("lngLoc1")!!) // mengambil nilai LatLng dan memastikannya tidak berniali 0.0
             val location1 = Location("")
             location1.latitude = locationList.get("latLoc1")!!
             location1.longitude = locationList.get("lngLoc2")!!
 
-            val loc2 = LatLng(locationList.get("latLoc2")!!, locationList.get("lngLoc2")!!)
+            val loc2 = LatLng(locationList.get("latLoc2")!!, locationList.get("lngLoc2")!!) // mengambil nilai LatLng dan memastikannya tidak berniali 0.0
             val location2 = Location("")
             location2.latitude = locationList.get("latLoc2")!!
             location2.longitude = locationList.get("lngLoc2")!!
 
+            /**
+             * membuat marker sesuai dengan nilai yg telah diset
+             * dan memberikannya garis hubung
+             * kemudian menampilkan hasil jarak antara keduanya
+             * pada TextView
+             */
             mMap.addMarker(MarkerOptions().position(loc1).title("position"))
             mMap.addMarker(MarkerOptions().position(loc2).title("position"))
 
@@ -97,8 +115,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             tvJarakHitungLokasi.text = "${distance/1000} KM"
         }
 
+        /**
+         * reset semua nilai yg ada pada mutableMapOf
+         * dan TextView
+         * serta menghilangkan marker sebelumnya
+         */
         btnReset.setOnClickListener {
             locationList.putAll(setOf("latLoc1" to 0.0, "lngLoc1" to 0.0, "latLoc2" to 0.0, "lngLoc2"  to 0.0))
+            addressList.putAll(setOf("address1" to "", "address2" to ""))
             tvLatLng1.text = ""
             tvLatLng2.text = ""
             tvJarakHitungLokasi.text = ""
